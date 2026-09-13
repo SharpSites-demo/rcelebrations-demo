@@ -73,7 +73,7 @@ start();
 }
 function pruneRipples(delta){
 var diag=Math.hypot(output.clientWidth,output.clientHeight);
-var speedPx=BASE_SPEED*Math.max(config.speed,0.05);
+var speedPx=BASE_SPEED*Math.max(config.speed,0.05); 
 var width=config.wavelength*Math.max(config.rings,1)*0.5;
 for(var j=ripples.length-1;j>=0;j--){
 var rp=ripples[j]; rp.age+=delta;
