@@ -172,7 +172,7 @@ var tl=gsap.timeline({defaults:{ease:"power3.out"}});
 tl.from(".hero .eyebrow",{y:18,opacity:0,duration:.6})
 .from(".hero h1",{y:34,opacity:0,duration:.8},"-=.4")
 .from(".hero .sub",{y:24,opacity:0,duration:.7},"-=.5")
-.from(".hero .cta-row .btn",{y:18,opacity:0,stagger:.12,duration:.6},"-=.4")
+.from(".hero .cta-row > *",{y:18,opacity:0,stagger:.12,duration:.6},"-=.4")
 .from(".hero-trust",{opacity:0,duration:.6},"-=.3")
 .from(".fx-ripple",{scale:.96,opacity:0,duration:.9,ease:"power2.out"},"-=.9");
 gsap.utils.toArray(".sec-head").forEach(function(el){
@@ -190,7 +190,7 @@ var target=parseFloat(el.getAttribute("data-count")), dec=(target%1!==0)?1:0, ob
 gsap.to(obj,{v:target,duration:1.6,ease:"power2.out",scrollTrigger:{trigger:el,start:"top 88%"},
 onUpdate:function(){ el.textContent=obj.v.toFixed(dec); }});
 });
-/* quote builder → pre-filled WhatsApp */
+/* quote builder → pre-filled request */
 var occ=document.getElementById("qbOcc"), guests=document.getElementById("qbGuests"), date=document.getElementById("qbDate"), need=document.getElementById("qbNeed"), send=document.getElementById("qbSend");
 function update(){
 var d=date.value?"on "+date.value:"date flexible";
@@ -198,6 +198,7 @@ var msg="Hi RCelebrations! I want a quote for my "+occ.value.toLowerCase()+" "+d
 send.href="https://wa.me/919811500961?text="+encodeURIComponent(msg);
 }
 [occ,guests,date,need].forEach(function(el){ el.addEventListener("change",update); });
+document.querySelectorAll(".pillar-cta").forEach(function(el){ el.addEventListener("click",function(){ var n=el.getAttribute("data-need"); if(n){ need.value=n; update(); } }); });
 update();
 });
 })();
