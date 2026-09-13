@@ -111,7 +111,7 @@ gl.viewport(0,0,output.width,output.height);
 if(htmlInCanvas){ render(); }
 else { gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT); }
 }
-var raf=0,lastTime=performance.now(),destroyed=false,running=false,visible=true;
+var raf=0,lastTime=performance.now(),destroyed=false,running=false,visible=true,ambientTimer=0;
 function frame(now){
 if(destroyed) return;
 if(!visible){ running=false; return; }
@@ -125,7 +125,6 @@ if(ripples.length>0){ render(); }
 else{ renderIdle(); if(!contentDirty&&(config.interval<=0||reducedMotion)){ running=false; return; } }
 raf=requestAnimationFrame(frame);
 }
-var ambientTimer=0;
 function start(){ if(destroyed||running||!visible) return; running=true; lastTime=performance.now(); raf=requestAnimationFrame(frame); }
 wake=start; start();
 function localPoint(e){ var rect=output.getBoundingClientRect(); return [e.clientX-rect.left,e.clientY-rect.top]; }
@@ -150,10 +149,10 @@ gl.deleteTexture(contentTexture); gl.deleteProgram(program); gl.deleteShader(vs)
 if(htmlInCanvas) source.onpaint=null; }
 };
 }
-/* ---- wiring: hero panel only; fallback keeps content as normal HTML ---- */
+/* ---- wiring: hero panel ripple + editorial motion + enquiry flow ---- */
 window.addEventListener("DOMContentLoaded",function(){
 var fxPanel=document.getElementById("fxRipple");
-if(!fxPanel) return;
+if(fxPanel){
 var source=document.getElementById("fxSource"), content=document.getElementById("fxContent"), output=document.getElementById("fxOutput");
 var native=supportsHtmlInCanvas();
 var instance=null;
@@ -163,42 +162,47 @@ instance=createRipple({source:source,content:content,output:output},{amplitude:0
 if(!instance){ native=false; source.classList.remove("is-native"); }
 }
 if(!native && content && content.parentNode!==fxPanel){ fxPanel.insertBefore(content,output); }
-/* GSAP motion — conversion-first, reduced-motion safe */
+}
+/* enquiry: compose request, point the single green button at it, confirm inline */
+var occ=document.getElementById("qbOcc"), guests=document.getElementById("qbGuests"), date=document.getElementById("qbDate"), need=document.getElementById("qbNeed");
+var fab=document.getElementById("waFab"), status=document.getElementById("qbStatus"), prepare=document.getElementById("qbPrepare");
+function compose(){
+var d=date.value?"on "+date.value:"date flexible";
+return "Hi RCelebrations! I want a quote for my "+occ.value.toLowerCase()+" "+d+". Guests: "+guests.value+". Need: "+need.value+".";
+}
+function refresh(){ if(fab) fab.href="https://wa.me/919811500961?text="+encodeURIComponent(compose()); }
+[occ,guests,date,need].forEach(function(el){ el.addEventListener("change",refresh); });
+document.querySelectorAll(".ch-cta").forEach(function(el){
+el.addEventListener("click",function(){ var n=el.getAttribute("data-need"); if(n){ need.value=n; refresh(); } });
+});
+if(prepare&&fab&&status){
+prepare.addEventListener("click",function(){
+refresh();
+status.textContent="Your request is ready — tap the green chat button, bottom right.";
+fab.classList.remove("pulse"); void fab.offsetWidth; fab.classList.add("pulse");
+});
+}
+refresh();
+/* GSAP editorial motion — conversion-first, reduced-motion safe */
 var reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 if(reduce||!window.gsap) return;
 gsap.registerPlugin(ScrollTrigger);
-gsap.set(".fx-output",{opacity:native?1:0});
 var tl=gsap.timeline({defaults:{ease:"power3.out"}});
-tl.from(".hero .eyebrow",{y:18,opacity:0,duration:.6})
-.from(".hero h1",{y:34,opacity:0,duration:.8},"-=.4")
-.from(".hero .sub",{y:24,opacity:0,duration:.7},"-=.5")
-.from(".hero .cta-row > *",{y:18,opacity:0,stagger:.12,duration:.6},"-=.4")
-.from(".hero-trust",{opacity:0,duration:.6},"-=.3")
-.from(".fx-ripple",{scale:.96,opacity:0,duration:.9,ease:"power2.out"},"-=.9");
+tl.from(".hero .kicker",{y:16,opacity:0,duration:.6})
+.from(".hero h1",{y:30,opacity:0,duration:.8},"-=.4")
+.from(".hero .standfirst",{y:22,opacity:0,duration:.7},"-=.5")
+.from(".hero .cta-row > *",{y:16,opacity:0,stagger:.12,duration:.6},"-=.4")
+.from(".hero .trust",{opacity:0,duration:.6},"-=.3")
+.from(".fx-ripple",{scale:.97,opacity:0,duration:.9,ease:"power2.out"},"-=.9");
 gsap.utils.toArray(".sec-head").forEach(function(el){
-gsap.from(el,{y:32,opacity:0,duration:.8,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 85%"}});
+gsap.from(el,{y:28,opacity:0,duration:.8,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 85%"}});
 });
-gsap.utils.toArray(".pillar").forEach(function(el){
-gsap.from(el.children,{y:36,opacity:0,duration:.8,stagger:.12,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 82%"}});
+gsap.utils.toArray(".chapter").forEach(function(el){
+gsap.from(el.children,{y:32,opacity:0,duration:.8,stagger:.12,ease:"power3.out",scrollTrigger:{trigger:el,start:"top 82%"}});
 });
-gsap.from(".chip",{scale:.85,opacity:0,duration:.5,stagger:.04,ease:"back.out(1.6)",scrollTrigger:{trigger:".chip-row",start:"top 88%"}});
-gsap.from(".step",{y:30,opacity:0,duration:.7,stagger:.12,ease:"power3.out",scrollTrigger:{trigger:".steps",start:"top 85%"}});
-gsap.from(".quote",{y:34,opacity:0,duration:.8,stagger:.14,ease:"power3.out",scrollTrigger:{trigger:".quotes",start:"top 85%"}});
-gsap.from(".v-row",{x:-26,opacity:0,duration:.6,stagger:.1,ease:"power3.out",scrollTrigger:{trigger:".v-list",start:"top 85%"}});
-gsap.utils.toArray(".stat b").forEach(function(el){
-var target=parseFloat(el.getAttribute("data-count")), dec=(target%1!==0)?1:0, obj={v:0};
-gsap.to(obj,{v:target,duration:1.6,ease:"power2.out",scrollTrigger:{trigger:el,start:"top 88%"},
-onUpdate:function(){ el.textContent=obj.v.toFixed(dec); }});
-});
-/* quote builder → pre-filled request */
-var occ=document.getElementById("qbOcc"), guests=document.getElementById("qbGuests"), date=document.getElementById("qbDate"), need=document.getElementById("qbNeed"), send=document.getElementById("qbSend");
-function update(){
-var d=date.value?"on "+date.value:"date flexible";
-var msg="Hi RCelebrations! I want a quote for my "+occ.value.toLowerCase()+" "+d+". Guests: "+guests.value+". Need: "+need.value+".";
-send.href="https://wa.me/919811500961?text="+encodeURIComponent(msg);
-}
-[occ,guests,date,need].forEach(function(el){ el.addEventListener("change",update); });
-document.querySelectorAll(".pillar-cta").forEach(function(el){ el.addEventListener("click",function(){ var n=el.getAttribute("data-need"); if(n){ need.value=n; update(); } }); });
-update();
+gsap.from(".toc li",{y:14,opacity:0,duration:.5,stagger:.04,ease:"power2.out",scrollTrigger:{trigger:".toc",start:"top 88%"}});
+gsap.from(".step",{y:26,opacity:0,duration:.7,stagger:.12,ease:"power3.out",scrollTrigger:{trigger:".steps",start:"top 85%"}});
+gsap.from(".pq",{y:30,opacity:0,duration:.8,stagger:.14,ease:"power3.out",scrollTrigger:{trigger:".pullquotes",start:"top 85%"}});
+gsap.from(".v-row",{x:-22,opacity:0,duration:.6,stagger:.1,ease:"power3.out",scrollTrigger:{trigger:".visit-grid",start:"top 85%"}});
 });
 })();
