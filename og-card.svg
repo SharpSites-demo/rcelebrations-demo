@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#fff7f7"/>
+  <circle cx="1045" cy="95" r="250" fill="#e7a3bc" opacity=".55"/>
+  <rect x="58" y="58" width="1084" height="514" rx="32" fill="#ffffff" stroke="#b72f63" stroke-width="6"/>
+  <text x="104" y="140" fill="#b72f63" font-family="Arial,Helvetica,sans-serif" font-size="28" font-weight="700" letter-spacing="4">EVENT PLANNING, CATERING AND DECORATION</text>
+  <text x="104" y="250" fill="#451d32" font-family="Arial,Helvetica,sans-serif" font-size="78" font-weight="800">RCelebrations Event Planner</text>
+  <text x="104" y="530" fill="#451d32" opacity=".7" font-family="Arial,Helvetica,sans-serif" font-size="26">Services, details and direct enquiries</text>
+</svg>
